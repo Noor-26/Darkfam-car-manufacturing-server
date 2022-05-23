@@ -20,6 +20,7 @@ const run = async () => {
         const orderCollection = client.db("manufacture").collection("orders");
         const reviewCollection = client.db("manufacture").collection("reviews");
         const userCollection = client.db("manufacture").collection("users");
+        
 
         app.get('/items' ,async (req,res) => {
             const tools = await toolCollection.find().toArray()
@@ -44,10 +45,29 @@ const run = async () => {
             const reviews = await reviewCollection.find().toArray()
             res.send(reviews)
         })
+
+        app.get('/users', async(req,res)=>{
+            const allUsers = await userCollection.find().toArray()
+            res.send(allUsers)
+        })
+
+        app.get('/user', async(req,res) => {
+            const email = req.query.email;
+            const filter = {email:email}
+            const user = await userCollection.findOne(filter)
+            res.send(user)
+        })
+
         app.post('/order',async(req,res) => {
             const order = req.body;
             const addOrder = await orderCollection.insertOne(order)
             res.send(addOrder);
+        })
+        app.post('/items',async(req,res) => {
+            const product = req.body;
+            console.log(product)
+            const addProduct = await toolCollection.insertOne(product)
+            res.send(addProduct);
         })
         app.post('/review',async(req,res) => {
             const review = req.body;
@@ -58,11 +78,13 @@ const run = async () => {
         app.put('/user/:email', async(req,res) => {
             const email = req.params.email;
             const user = req.body
-            // console.log(user.education,email)
+            console.log(user)
             const cursor = {email:email};
             const options = {upsert:true};
             const updateDoc = {
                 $set : {
+                    img:user.img,
+                    name:user.name,
                     education:user.education,
                     location:user.location,
                     number:user.number,
