@@ -40,6 +40,10 @@ const run = async () => {
             const getOrder = await orderCollection.find(filter).toArray()
             res.send(getOrder);
         })
+        app.get('/orders' ,async (req,res) => {
+            const Orders = await orderCollection.find().toArray()
+            res.send(Orders)
+        })
         
         app.get('/review' ,async (req,res) => {
             const reviews = await reviewCollection.find().toArray()
@@ -63,12 +67,14 @@ const run = async () => {
             const addOrder = await orderCollection.insertOne(order)
             res.send(addOrder);
         })
+
         app.post('/items',async(req,res) => {
             const product = req.body;
             console.log(product)
             const addProduct = await toolCollection.insertOne(product)
             res.send(addProduct);
         })
+
         app.post('/review',async(req,res) => {
             const review = req.body;
             const addReview = await reviewCollection.insertOne(review)
