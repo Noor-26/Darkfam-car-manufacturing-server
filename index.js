@@ -17,6 +17,9 @@ const run = async () => {
     try{
         await client.connect()
         const toolCollection = client.db("manufacture").collection("tools");
+        const orderCollection = client.db("manufacture").collection("orders");
+        const reviewCollection = client.db("manufacture").collection("reviews");
+        const userCollection = client.db("manufacture").collection("users");
 
         app.get('/items' ,async (req,res) => {
             const tools = await toolCollection.find().toArray()
@@ -30,7 +33,49 @@ const run = async () => {
             res.send(purchaseItem)
         })
 
+        app.get('/order',async(req,res) => {
+            const email = req.query.email;
+            const filter = {email:email}
+            const getOrder = await orderCollection.find(filter).toArray()
+            res.send(getOrder);
+        })
+        
+        app.get('/review' ,async (req,res) => {
+            const reviews = await reviewCollection.find().toArray()
+            res.send(reviews)
+        })
+        app.post('/order',async(req,res) => {
+            const order = req.body;
+            const addOrder = await orderCollection.insertOne(order)
+            res.send(addOrder);
+        })
+        app.post('/review',async(req,res) => {
+            const review = req.body;
+            const addReview = await reviewCollection.insertOne(review)
+            res.send(addReview);
+        })
+
+        app.put('/user/:email', async(req,res) => {
+            const email = req.params.email;
+            const user = req.body
+            // console.log(user.education,email)
+            const cursor = {email:email};
+            const options = {upsert:true};
+            const updateDoc = {
+                $set : {
+                    education:user.education,
+                    location:user.location,
+                    number:user.number,
+                    linkdin:user.linkdin
+                 }
+            }
+            const result = await userCollection.updateOne(cursor,updateDoc,options)
+            res.send(result)
+        })
+
     }
+
+    
     finally{
 
     }
