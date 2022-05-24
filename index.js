@@ -54,10 +54,11 @@ const run = async () => {
             const allUsers = await userCollection.find().toArray()
             res.send(allUsers)
         })
+        
         app.get('/admin/:email',async(req,res)=>{
             const email = req.params.email
             const user = await userCollection.findOne({email:email})
-            const isAdmin = user.role === 'admin'
+            const isAdmin = user?.role === 'admin'
             res.send({admin : isAdmin})
         })
 
@@ -125,9 +126,15 @@ const run = async () => {
             const deleteProduct = await toolCollection.deleteOne(filter)
             res.send(deleteProduct)
         })
+        app.delete('/order/:id',async(req,res) => {
+            const orderId = req.params.id
+            const filter = {_id:ObjectId(orderId)}
+            const deleteOrder = await orderCollection.deleteOne(filter)
+            res.send(deleteOrder)
+        })
     }
 
-    
+
     finally{
 
     }
