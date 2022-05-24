@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config()
 const port = process.env.PORT || 5000
 const app = express()
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId} = require('mongodb');
 
 // middlewere
@@ -13,6 +14,21 @@ app.use(express.json())
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.tq1da.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+function varifyToken (req,res,next) {
+    const authorize = req.headers.authorization
+   if(!authorize){
+    return res.status(401).send({message:"who are you"})
+   }
+   const token = authorize.split(" ")[1]
+   jwt.verify(token, process.env.ACCESS_TOKEN, function(err, decoded) {
+   if(err){
+    return res.status(403).send({message:"You can't enter"})
+   }
+   req.decoded = decoded
+   next()
+  });
+   
+}
 const run = async () => {
     try{
         await client.connect()
@@ -34,7 +50,7 @@ const run = async () => {
             res.send(purchaseItem)
         })
 
-        app.get('/order',async(req,res) => {
+        app.get('/order',varifyToken, async(req,res) => {
             const email = req.query.email;
             const filter = {email:email}
             const getOrder = await orderCollection.find(filter).toArray()
@@ -98,6 +114,18 @@ const run = async () => {
             const makeAdmin = await userCollection.updateOne(filter,updateDoc)
             res.send(makeAdmin)
 
+        })
+        app.put('/users/:email',async(req,res)=>{
+            const email = req.params.email
+            const user = req.body
+            const filter = {email:email}
+            const options = {upsert:true}
+            const updateDoc={
+                $set:user
+            }
+            const result = await userCollection.updateOne(filter,updateDoc,options)
+            const token = jwt.sign({email:email},process.env.ACCESS_TOKEN,{expiresIn:'1d'})
+            res.send({result,token});
         })
 
         app.put('/user/:email', async(req,res) => {
