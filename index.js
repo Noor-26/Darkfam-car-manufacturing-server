@@ -40,7 +40,6 @@ const run = async () => {
         
         const varifyAdmin =async (req,res,next) => {
             const requester = await req?.decoded?.email
-            console.log(requester)
             if(requester){
 
                 const requesterAccount = await userCollection.findOne({email:requester})
@@ -120,7 +119,6 @@ const run = async () => {
 
         app.post('/items',varifyToken, async(req,res) => {
             const product = req.body;
-            console.log(product)
             const addProduct = await toolCollection.insertOne(product)
             res.send(addProduct);
         })
@@ -171,7 +169,6 @@ const run = async () => {
         app.put('/user/:email',varifyToken, async(req,res) => {
             const email = req.params.email;
             const user = req.body
-            console.log(user)
             const cursor = {email:email};
             const options = {upsert:true};
             const updateDoc = {
@@ -227,8 +224,6 @@ const run = async () => {
             res.send(deleteOrder)
         })
     }
-
-
     finally{
 
     }
