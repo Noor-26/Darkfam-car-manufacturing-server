@@ -39,13 +39,17 @@ const run = async () => {
         const userCollection = client.db("manufacture").collection("users");
         
         const varifyAdmin =async (req,res,next) => {
-            const requester = req.decoded.email
-            const requesterAccount = await userCollection.findOne({email:requester})
-            if(requesterAccount.role === 'admin'){
-                next()
-            }
-            else{
-                res.status(403).send({message:"you can't enter in the website(*_*)"})
+            const requester = await req?.decoded?.email
+            console.log(requester)
+            if(requester){
+
+                const requesterAccount = await userCollection.findOne({email:requester})
+                if(requesterAccount.role === 'admin'){
+                    next()
+                }
+                else{
+                    res.status(403).send({message:"you can't enter in the website(*_*)"})
+                }
             }
         }
 
@@ -165,7 +169,7 @@ const run = async () => {
             res.send({result,token});
         })
 
-        app.put('/users/:email',varifyToken, async(req,res) => {
+        app.put('/user/:email',varifyToken, async(req,res) => {
             const email = req.params.email;
             const user = req.body
             console.log(user)
@@ -210,7 +214,7 @@ const run = async () => {
             res.send(updateDoc)
         })
 
-        app.delete('/items/:id',varifyAdmin,varifyToken, async(req,res) => {
+        app.delete('/items/:id',varifyToken, async(req,res) => {
             const productId = req.params.id
             const filter = {_id:ObjectId(productId)}
             const deleteProduct = await toolCollection.deleteOne(filter)
