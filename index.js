@@ -37,7 +37,6 @@ const run = async () => {
         const orderCollection = client.db("manufacture").collection("orders");
         const reviewCollection = client.db("manufacture").collection("reviews");
         const userCollection = client.db("manufacture").collection("users");
-        const paymentCollection = client.db("manufacture").collection("payments");
         
         const varifyAdmin =async (req,res,next) => {
             const requester = req.decoded.email
@@ -50,10 +49,14 @@ const run = async () => {
             }
         }
 
+        app.get('/item' ,async (req,res) => {
+            const tools = await toolCollection.find().sort({ $natural: -1 }).limit(6).toArray()
+            res.send(tools)
+        })
         app.get('/items' ,async (req,res) => {
-            const tools = await toolCollection.find().limit(6).toArray()
-            const main = tools.reverse()
-            res.send(main)
+            const tools = await toolCollection.find().toArray()
+      
+            res.send(tools)
         })
         
         app.get('/item/:id',varifyToken, async(req,res) =>{
@@ -62,7 +65,7 @@ const run = async () => {
             const purchaseItem = await toolCollection.findOne(query)
             res.send(purchaseItem)
         })
-         
+           
         app.get('/payment/:_id', async(req,res) =>{
             const itemId = req.params._id
             const query = {_id:ObjectId(itemId)}
@@ -193,7 +196,17 @@ const run = async () => {
                 }
             }
             const updateOrder = await orderCollection.updateOne(filter,updateDoc)
-            const result = await paymentCollection.insertOne(payment)
+            res.send(updateDoc)
+        })
+        app.patch('/order/:_id',varifyToken, async(req,res) => {
+            const id = req.params._id
+            const filter = {_id:ObjectId(id)}
+            const updateDoc={
+                $set:{
+                    status:'shipped'
+                }
+            }
+            const updateOrder = await orderCollection.updateOne(filter,updateDoc)
             res.send(updateDoc)
         })
 
