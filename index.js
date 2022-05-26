@@ -57,9 +57,8 @@ const run = async () => {
             const tools = await toolCollection.find().sort({ $natural: -1 }).limit(6).toArray()
             res.send(tools)
         })
-        app.get('/items' ,async (req,res) => {
+        app.get('/items' ,varifyToken,async (req,res) => {
             const tools = await toolCollection.find().toArray()
-      
             res.send(tools)
         })
         
